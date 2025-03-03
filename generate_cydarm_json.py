@@ -18,7 +18,7 @@ import os
 
 from gen_app_json import *
 
-APP_VERSION = os.getenv("APP_VERSION", "1.0.0")
+APP_VERSION = os.getenv("APP_VERSION", "1.0.1")
 ACTIONS = [
     generate_action(identifier="test_connectivity",
                     action_type="test",
@@ -233,7 +233,33 @@ ACTIONS = [
                     ]),
                     output=OUTPUT_STATUS_MESSAGE_SUMMARY
                     ),
-
+    generate_action(action_name="create case file",
+                   identifier="create_case_data_file",
+                   description="Create a file data entry for a case",
+                   verbose="Uploads a file as case data with the specified MIME type and significance",
+                   read_only=False,
+                   parameters=generate_input_params_dict([
+                       InputParam(name="case_uuid",
+                                description="UUID of the case",
+                                required=True),
+                       InputParam(name="file_data",
+                                description="Raw content of the file (will be base64 encoded)",
+                                required=True),
+                       InputParam(name="file_name",
+                                description="Name of the file",
+                                required=True),
+                       InputParam(name="mime_type",
+                                description="MIME type of the file (e.g. 'application/pdf', 'image/png')",
+                                required=True),
+                       InputParam(name="file_last_mod",
+                                description="Last modification timestamp of the file",
+                                required=False),
+                       InputParam(name="significance",
+                                description="Significance of the file (defaults to 'Comment')",
+                                required=False),
+                   ]),
+                   output=OUTPUT_STATUS_MESSAGE_SUMMARY + OUTPUT_UUID_AND_ACL_MODEL
+    ),
 ]
 JSON = {
     "appid": "2205e95a-16ab-479d-9c10-363d05153dcb",

@@ -172,6 +172,32 @@ class CydarmAPI:
             "significance": "Comment"
         })
 
+    def create_case_data_file(self, case_uuid: str, file_data: bytes, file_name: str, mime_type: str,
+                             file_last_mod: int = None, significance: str = "Comment"):
+        """Create a file data entry for a case.
+
+        Args:
+            case_uuid: UUID of the case
+            file_data: Raw bytes of the file content
+            file_name: Name of the file
+            mime_type: MIME type of the file (e.g. 'image/png')
+            file_last_mod: Last modification timestamp of the file (optional)
+            significance: Significance of the file (defaults to 'Comment')
+
+        Returns:
+            Response from the API
+        """
+        data = {
+            "data": b64encode(file_data).decode("ascii"),
+            "significance": significance,
+            "fileName": file_name,
+            "mimeType": mime_type,
+        }
+        if file_last_mod is not None:
+            data["fileLastMod"] = file_last_mod
+
+        return self.rest_post(f"/case/{case_uuid}/data", json=data)
+
     def get_case_data_list(self, case_uuid: str):
         return self.rest_get(f"/case/{case_uuid}/data")
 
@@ -182,9 +208,7 @@ class CydarmAPI:
         })
 
     def get_cases_filtered(self, page_size=1000, filter_text: str = "", tags_included: str = ""):
-        # TODO: implement remaining query params for getCasesFiltered
-        # TODO: Cydarm API seems to have bug with cases that have multiple assigned tags - returns HTTP 500
-        """
+        """ Return a list of up to 1000 cases, filtering on text and tags.
 
         :param page_size:
         :param filter_text:

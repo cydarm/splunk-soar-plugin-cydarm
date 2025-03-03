@@ -89,6 +89,23 @@ class CydarmConnector(BaseConnector):
         kwargs["comment"] = param["data"]
         return self.call_cydarm_api(func, kwargs)
 
+    def _handle_create_case_data_file(self, param):
+        func = self.cydarm.create_case_data_file
+        kwargs = self.extract_args_dict(param, [
+            "case_uuid",
+            "file_data",
+            "file_name",
+            "mime_type",
+            "file_last_mod",
+            "significance"
+        ])
+
+        # Convert file_data to bytes if it's not already
+        if isinstance(kwargs.get("file_data"), str):
+            kwargs["file_data"] = kwargs["file_data"].encode()
+
+        return self.call_cydarm_api(func, kwargs)
+
     @staticmethod
     def parse_case_args(param) -> dict:
         arg_names = ['acl', 'assignee', 'closed', 'created', 'deletable', 'description', 'editable', 'locator',
