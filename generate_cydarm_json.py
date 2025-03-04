@@ -18,7 +18,7 @@ import os
 
 from gen_app_json import *
 
-APP_VERSION = os.getenv("APP_VERSION", "1.0.1")
+APP_VERSION = os.getenv("APP_VERSION", "1.1.0")
 ACTIONS = [
     generate_action(identifier="test_connectivity",
                     action_type="test",
