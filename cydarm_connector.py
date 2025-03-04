@@ -90,7 +90,10 @@ class CydarmConnector(BaseConnector):
         return self.call_cydarm_api(func, kwargs)
 
     def _handle_create_case_data_file(self, param):
+        # Get the function reference from the API class
         func = self.cydarm.create_case_data_file
+
+        # Extract parameters
         kwargs = self.extract_args_dict(param, [
             "case_uuid",
             "file_data",
@@ -104,6 +107,11 @@ class CydarmConnector(BaseConnector):
         if isinstance(kwargs.get("file_data"), str):
             kwargs["file_data"] = kwargs["file_data"].encode()
 
+        # Convert file_last_mod to int if present
+        if "file_last_mod" in kwargs:
+            kwargs["file_last_mod"] = int(kwargs["file_last_mod"])
+
+        # Call the API function using the call_cydarm_api helper
         return self.call_cydarm_api(func, kwargs)
 
     @staticmethod

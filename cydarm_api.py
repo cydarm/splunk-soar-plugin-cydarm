@@ -187,14 +187,19 @@ class CydarmAPI:
         Returns:
             Response from the API
         """
+        # Strip any extra quotes from mime_type and significance
+        mime_type = mime_type.strip('"')
+        significance = significance.strip('"')
+
         data = {
-            "data": b64encode(file_data).decode("ascii"),
+            "data": b64encode(file_data.encode('utf-8') if isinstance(file_data, str) else file_data).decode("ascii"),
             "significance": significance,
             "fileName": file_name,
             "mimeType": mime_type,
         }
         if file_last_mod is not None:
-            data["fileLastMod"] = file_last_mod
+            # Ensure file_last_mod is an integer
+            data["fileLastMod"] = int(file_last_mod) if isinstance(file_last_mod, str) else file_last_mod
 
         return self.rest_post(f"/case/{case_uuid}/data", json=data)
 
