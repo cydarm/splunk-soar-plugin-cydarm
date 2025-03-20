@@ -14,6 +14,7 @@
 # and limitations under the License.
 #
 
+import base64
 import json
 from collections.abc import Iterable
 from typing import Callable, Optional
@@ -87,6 +88,50 @@ class CydarmConnector(BaseConnector):
         kwargs = self.extract_args_dict(param, ["case_uuid"])
         kwargs["comment"] = param["data"]
         return self.call_cydarm_api(func, kwargs)
+
+    def _handle_create_case_data_file(self, param):
+        """Handle the create_case_file action"""
+        # Add an action result object to self (BaseConnector) to represent the action for this param
+        action_result = self.add_action_result(ActionResult(dict(param)))
+
+        try:
+            # Extract parameters
+            kwargs = self.extract_args_dict(param, [
+                "case_uuid",
+                "file_data",
+                "file_name",
+                "mime_type",
+                "file_last_mod",
+                "significance"
+            ])
+
+            # Now file_data is a string containing base64-encoded data
+            # We need to convert it to bytes for the API
+            if isinstance(kwargs.get("file_data"), str):
+                # Convert base64 string to bytes
+                kwargs["file_data"] = base64.b64decode(kwargs["file_data"])
+
+            # Convert file_last_mod to int if present
+            if "file_last_mod" in kwargs and kwargs["file_last_mod"]:
+                kwargs["file_last_mod"] = int(kwargs["file_last_mod"])
+
+            # Call the API function
+            response = self.cydarm.create_case_data_file(**kwargs)
+
+            # Add the response data to the action_result
+            action_result.add_data(response)
+
+            # Add a summary
+            action_result.update_summary({
+                "total_objects": 1,
+                "total_objects_successful": 1,
+            })
+
+            return action_result.set_status(phantom.APP_SUCCESS)
+
+        except Exception as e:
+            self.save_progress(f"Error occurred: {str(e)}")
+            return action_result.set_status(phantom.APP_ERROR, f"Error creating case file: {str(e)}")
 
     @staticmethod
     def parse_case_args(param) -> dict:
